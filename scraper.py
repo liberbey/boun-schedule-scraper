@@ -42,7 +42,7 @@ dept_list = [("ASIA", "ASIAN+STUDIES"), ("ASIA", "ASIAN+STUDIES+WITH+THESIS"),
 
 n = 1998  # create the list for years and semesters
 semesters = []
-for i in range(20, 21):
+for i in range(0, 21):
     for a in range(1, 4):
         semesters += [(n, n + 1, a)]
     n += 1
@@ -78,11 +78,11 @@ for semester in semesters:
             data = data.loc[1:, :]
             deptData = create_dict_from_html(data)
             this_semester_dicts.update({dept: deptData})
-        except ValueError:
-            print("error")
+            
+        except:
+            pass
 
     # aynı yıl farklı departmanlar burada birleştirilecek.
 
     all_semesters_dicts.update(this_semester_dicts)
-    
-print(all_semesters_dicts)
+
