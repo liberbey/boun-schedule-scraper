@@ -13,7 +13,7 @@ dept_list = [("ASIA", "ASIAN+STUDIES"), ("ASIA", "ASIAN+STUDIES+WITH+THESIS"),
              ("CCS", "CRITICAL+AND+CULTURAL+STUDIES"),
              ("EQE", "EARTHQUAKE+ENGINEERING"), ("EC", "ECONOMICS"), ("EF", "ECONOMICS+AND+FINANCE"),
              ("ED", "EDUCATIONAL+SCIENCES"),
-             ("CET", " EDUCATIONAL+TECHNOLOGY"), ("EE", "ELECTRICAL+%26+ELECTRONICS+ENGINEERING"),
+             ("CET", "EDUCATIONAL+TECHNOLOGY"), ("EE", "ELECTRICAL+%26+ELECTRONICS+ENGINEERING"),
              ("ETM", "ENGINEERING+AND+TECHNOLOGY+MANAGEMENT"),
              ("ENV", "ENVIRONMENTAL+SCIENCES"), ("ENVT", "ENVIRONMENTAL+TECHNOLOGY"), ("XMB", "EXECUTIVE+MBA"),
              ("FE", "FINANCIAL+ENGINEERING"),
@@ -42,12 +42,45 @@ dept_list = [("ASIA", "ASIAN+STUDIES"), ("ASIA", "ASIAN+STUDIES+WITH+THESIS"),
 
 n = 1998  # create the list for years and semesters
 semesters = []
-for i in range(20, 21):
+for i in range(21):
     for a in range(1, 4):
         semesters += [(n, n + 1, a)]
     n += 1
 
 semesters = semesters[:-1]
+
+
+semester = (2018,2019,1)    # Just for one semester for now. We will iterate over the semesters.
+dept_courses = {}
+for dept in dept_list:
+  url = "https://registration.boun.edu.tr/scripts/sch.asp?donem={}/{}-{}&kisaadi={}&bolum={}".format(semester[0],
+                                                                                                   semester[1],
+                                                                                                   semester[2],
+                                                                                                   dept[0],
+                                                                                                   dept[1])
+
+  try :
+    data = pd.read_html(url)[3].iloc[1:,:]
+  except ValueError:    # If table does not exist
+    continue
+
+  courses = {}
+  for index, row in data.iterrows():    # Iterate over the rows of the dataframe read from html source code.
+    try:
+      course_code = row[0][:-3]     # Delete the section part. CMPE150.01 -> CMPE150
+      if course_code in courses:
+        if row[5] not in courses[course_code][3]:
+          courses[course_code][3].append(row[5])    # Add the distinct instructor.
+      else:
+        courses[course_code] = [dept, row[2], semester, [row[5]]]
+    except TypeError:       # If the course code is NaN, which means the row indicates Lab or Ps.
+      continue
+  dept_courses[dept] = courses
+
+
+
+"""
+
 all_semesters_dicts = {}  # list that contains lists of department dictionaries of each semester
 
 
@@ -77,12 +110,12 @@ for semester in semesters:
             data = pd.read_html(url)[3]
             data = data.loc[1:, :]
             deptData = create_dict_from_html(data)
-            this_semester_dicts.update({dept: deptData})
-
-        except:
+            this_semester_dicts[dept[0]] = deptData
+        except ValueError:
             pass
 
     # aynı yıl farklı departmanlar burada birleştirilecek.
 
-    all_semesters_dicts.update({semester: this_semester_dicts})
+    all_semesters_dicts[semester] = this_semester_dicts
 
+"""
