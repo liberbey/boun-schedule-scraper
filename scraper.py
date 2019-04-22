@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+import time
+
+
 
 dept_list = [("ASIA", "ASIAN+STUDIES"), ("ASIA", "ASIAN+STUDIES+WITH+THESIS"),
              ("ATA", "ATATURK+INSTITUTE+FOR+MODERN+TURKISH+HISTORY"),
@@ -50,6 +53,10 @@ for i in range(21):
 semesters = semesters[:-1]
 
 
+start = time.time()
+
+
+
 semester = (2018,2019,1)    # Just for one semester for now. We will iterate over the semesters.
 dept_courses = {}
 for dept in dept_list:
@@ -77,7 +84,8 @@ for dept in dept_list:
       continue
   dept_courses[dept] = courses
 
-
+end = time.time()
+print(end - start)
 
 """
 
