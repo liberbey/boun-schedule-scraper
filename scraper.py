@@ -57,35 +57,49 @@ start = time.time()
 
 
 
-semester = (2018,2019,1)    # Just for one semester for now. We will iterate over the semesters.
-dept_courses = {}
-for dept in dept_list:
-  url = "https://registration.boun.edu.tr/scripts/sch.asp?donem={}/{}-{}&kisaadi={}&bolum={}".format(semester[0],
-                                                                                                   semester[1],
-                                                                                                   semester[2],
-                                                                                                   dept[0],
-                                                                                                   dept[1])
+semesters = [(2018,2019,1),(2018,2019,2)]   # Just for two semester for now. We will iterate over the semesters.
+semt_courses = {}
+for semester in semesters:
+    dept_courses = {}
+    for dept in dept_list:
+        url = "https://registration.boun.edu.tr/scripts/sch.asp?donem={}/{}-{}&kisaadi={}&bolum={}".format(semester[0],
+                                                                                                       semester[1],
+                                                                                                       semester[2],
+                                                                                                       dept[0],
+                                                                                                       dept[1])
 
-  try :
-    data = pd.read_html(url)[3].iloc[1:,:]
-  except ValueError:    # If table does not exist
-    continue
+        try :
+            data = pd.read_html(url)[3].iloc[1:,:]
+        except ValueError:    # If table does not exist
+            continue
 
-  courses = {}
-  for index, row in data.iterrows():    # Iterate over the rows of the dataframe read from html source code.
-    try:
-      course_code = row[0][:-3]     # Delete the section part. CMPE150.01 -> CMPE150
-      if course_code in courses:
-        if row[5] not in courses[course_code][3]:
-          courses[course_code][3].append(row[5])    # Add the distinct instructor.
-      else:
-        courses[course_code] = [dept, row[2], semester, [row[5]]]
-    except TypeError:       # If the course code is NaN, which means the row indicates Lab or Ps.
-      continue
-  dept_courses[dept] = courses
+        courses = {}
+        for index, row in data.iterrows():    # Iterate over the rows of the dataframe read from html source code.
+            try:
+                course_code = row[0][:-3]     # Delete the section part. CMPE150.01 -> CMPE150
+                if course_code in courses:
+                    if row[5] not in courses[course_code][3]:
+                        courses[course_code][3].append(row[5])    # Add the distinct instructor.
+                else:
+                    courses[course_code] = [dept, row[2], semester, [row[5]]]
+            except TypeError:       # If the course code is NaN, which means the row indicates Lab or Ps.
+                continue
+        dept_courses[dept] = courses
+    semt_courses[semester] = dept_courses
 
 end = time.time()
 print(end - start)
+
+
+
+def course_statistics(semt_courses):
+    # semt_courses = {(2017,2018,1): {("CMPE", "COMPUTER+ENGINEERING"): {"CMPE150": [dept_name, coursename, semester, instructors]}} }
+    """
+    This function takes semt_courses dictionary and calculates grad, undergrad and distinct instructors for each semester.
+    """
+
+
+
 
 """
 
