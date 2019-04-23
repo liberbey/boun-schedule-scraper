@@ -56,17 +56,17 @@ semesters = semesters[:-1]
 start = time.time()
 
 
+semesters = [(2017,2018,1),(2018,2019,1)]   # Just for two semester for now. We will iterate over the semesters.
 
-semesters = [(2018,2019,1),(2018,2019,2)]   # Just for two semester for now. We will iterate over the semesters.
 semt_courses = {}
 for semester in semesters:
     dept_courses = {}
     for dept in dept_list:
         url = "https://registration.boun.edu.tr/scripts/sch.asp?donem={}/{}-{}&kisaadi={}&bolum={}".format(semester[0],
-                                                                                                       semester[1],
-                                                                                                       semester[2],
-                                                                                                       dept[0],
-                                                                                                       dept[1])
+                                                                                                           semester[1],
+                                                                                                           semester[2],
+                                                                                                           dept[0],
+                                                                                                           dept[1])
 
         try :
             data = pd.read_html(url)[3].iloc[1:,:]
@@ -87,8 +87,45 @@ for semester in semesters:
         dept_courses[dept] = courses
     semt_courses[semester] = dept_courses
 
+
 end = time.time()
 print(end - start)
+
+df = pd.DataFrame(columns=["Department/Program", "Course Code", "Course Name"])
+
+for semester in semesters:
+    semester_name = str(semester[0])+"-"+str(semester[2])
+    df[semester_name] = []
+df["total offerings"] = []
+
+for semester in semt_courses:
+    current_semester = semt_courses[semester]
+
+    for dept in current_semester:
+        current_course_list = current_semester[dept]
+        new_row = {"Department/Program":dept[0] ,"Course Code":"U4 U2","Course Name":""}
+
+        for semester in semesters:
+            semester_name = str(semester[0])+"-"+str(semester[2])
+            new_row[semester_name] = "U1 G1"
+
+        new_row["total offerings"] = "U2 G2"
+        df = df.append(new_row, ignore_index=True)
+
+        for course_key in current_course_list:
+            course = current_course_list[course_key]
+            semester_name = str(course[2][0])+"-"+str(course[2][2])
+            if len(df.loc[df["Course Code"] == course_key]) == 0:
+                new_row = {"Department/Program":"" ,"Course Code":course_key,"Course Name":course[1]}
+                new_row[semester_name] = "x"
+                df = df.append(new_row, ignore_index=True)
+            else:
+                df.loc[df["Course Code"] == course_key, semester_name] = "x"
+
+df.to_csv("output.csv")
+print(df)
+
+
 
 
 
@@ -97,47 +134,4 @@ def course_statistics(semt_courses):
     """
     This function takes semt_courses dictionary and calculates grad, undergrad and distinct instructors for each semester.
     """
-
-
-
-
-"""
-
-all_semesters_dicts = {}  # list that contains lists of department dictionaries of each semester
-
-
-def create_dict_from_html(html_df):
-    """
-    Obtain the distinct course names from html table.
-    Returns dictionary containing courses info and dept name.
-    """
-    dept_data = pd.DataFrame({'Code': html_df.iloc[:, 0],  # course code, course name, course instructor
-                              'Name': html_df.iloc[:, 2],
-                              'Instructor': html_df.iloc[:, 5]})
-
-    return dept_data
-
-
-for semester in semesters:
-
-    this_semester_dicts = {}  # list that contains dictionaries of departments for 'this' semester
-
-    for dept in dept_list:
-        url = "https://registration.boun.edu.tr/scripts/sch.asp?donem={}/{}-{}&kisaadi={}&bolum={}".format(semester[0],
-                                                                                                           semester[1],
-                                                                                                           semester[2],
-                                                                                                           dept[0],
-                                                                                                           dept[1])
-        try:
-            data = pd.read_html(url)[3]
-            data = data.loc[1:, :]
-            deptData = create_dict_from_html(data)
-            this_semester_dicts[dept[0]] = deptData
-        except ValueError:
-            pass
-
-    # aynı yıl farklı departmanlar burada birleştirilecek.
-
-    all_semesters_dicts[semester] = this_semester_dicts
-
-"""
+    pass
