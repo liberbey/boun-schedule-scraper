@@ -59,6 +59,7 @@ start = time.time()
 semesters = [(2017,2018,1),(2018,2019,1)]   # Just for two semester for now. We will iterate over the semesters.
 
 all_courses = {}
+
 for semester in semesters:
     for dept in dept_list:
         url = "https://registration.boun.edu.tr/scripts/sch.asp?donem={}/{}-{}&kisaadi={}&bolum={}".format(semester[0],
@@ -71,24 +72,24 @@ for semester in semesters:
             data = pd.read_html(url)[3].iloc[1:,:]
         except ValueError:    # If table does not exist
             continue
+
         if dept not in all_courses:
             all_courses[dept] = {}
         for index, row in data.iterrows():    # Iterate over the rows of the dataframe read from html source code.
             try:
                 course_code = row[0][:-3]     # Delete the section part. CMPE150.01 -> CMPE150
                 if course_code in all_courses[dept]:
-                    if row[5] not in all_courses[dept][course_code][3]:
-                        all_courses[dept][course_code][3].append(row[5])    # Add the distinct instructor.
-                    if semester not in all_courses[dept][course_code][2]:
-                        all_courses[dept][course_code][2].append(semester)
+                    if semester not in all_courses[dept][course_code][2]:  ## BUG
+                        all_courses[dept][course_code][2][semester] = [row[5]]
                 else:
-                    all_courses[dept][course_code] = [dept, row[2], [semester], [row[5]]]
+                    all_courses[dept][course_code] = [dept, row[2], {semester: [row[5]]}, {"total_offering":1}]
             except TypeError:       # If the course code is NaN, which means the row indicates Lab or Ps.
                 continue
 
 
-end = time.time()
-print(end - start)
+
+sorted_dept = sorted(all_courses.keys())
+
 
 df = pd.DataFrame(columns=["Department/Program", "Course Code", "Course Name"])
 
@@ -97,17 +98,18 @@ for semester in semesters:
     df[semester_name] = []
 df["total offerings"] = []
 
-for dept in all_courses:
+for dept in sorted_dept:
     current_course_list = all_courses[dept]
-    new_row = {"Department/Program":dept[0] ,"Course Code":"U4 U2","Course Name":""}
+    sorted_courses = sorted(current_course_list.keys())
+    new_row = {"Department/Program":dept[0] ,"Course Code":"U4 U2","Course Name":""}    ###
 
     for semester in semesters:
         semester_name = str(semester[0])+"-"+str(semester[2])
-        new_row[semester_name] = "U1 G1"
-    new_row["total offerings"] = "U2 G2"
+        new_row[semester_name] = course_statistics(dept, semester)            ###
+    new_row["total offerings"] = course_statistics_total(dept)            ###
     df = df.append(new_row, ignore_index=True)
 
-    for course_key in current_course_list:
+    for course_key in sorted_courses:
         course = current_course_list[course_key]
         for semester in course[2]:
             semester_name = str(semester[0])+"-"+str(semester[2])
@@ -122,38 +124,33 @@ df.to_csv("output.csv")
 print(df)
 
 
+end = time.time()
+print(end - start)
 
 
 
-def course_statistics(semt_courses):
+def course_statistics_total(dept):
     # semt_courses = {(2017,2018,1): {("CMPE", "COMPUTER+ENGINEERING"): {"CMPE150": [dept_name, coursename, semester, instructors]}} }
     """
-    This function takes semt_courses dictionary and calculates grad, undergrad and distinct instructors for each semester.
+    This function takes semt_courses dictionary and calculates grad, undergrad and distinct instructors for each semester and total offerings.
     """
-    answer = []  # [(semester, dept, numOfGrad, numOfUnderGrad, instr_num)]
+    this_course_list = all_courses[dept]
+    grad = 0
+    undergrad = 0
+    instr_num = 0
+    instr_list = []
+    for course_key in this_course_list:
+        try:
+            if int(course_key[-3]) > 4:
+                grad += 1
+            else:
+                undergrad += 1
+        except ValueError or TypeError:
+            undergrad += 1 #buraya bak
+        for semester in course_key[2]:
+            instr_list.append(course_key[2][semester])
+        instr_num = len(set(instr_list))
 
-    for semester in semt_courses:
-        this_semester = semt_courses[semester]
-
-        for dept in this_semester:
-            this_course_list = this_semester[dept]
-            grad = 0
-            undergrad = 0
-            instr_list = []
-            for course in this_course_list:
-                try:
-                    if int(course[-3]) > 4: #course'un adinin sondan 3. harfi ???
-                        grad += 1
-                    else:
-                        undergrad += 1
-                except ValueError or TypeError:
-                    continue
-            for course in this_course_list:
-                temp_list = course[3]
-                for j in range(0, len(temp_list)):
-                    instr_list.append(temp_list[i])
-
-            instr_num = len(set(instr_list))
-            answer.append([semester, dept, grad, undergrad, instr_num])
+    answer = [grad, undergrad, instr_num]
 
     return answer
