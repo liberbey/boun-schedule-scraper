@@ -3,6 +3,31 @@ import numpy as np
 import time
 
 
+def course_statistics(dept, semester):
+
+    this_course_list = all_courses[dept]
+    answer = [0, 0, 0]
+    instr_list = []
+    for course_key in this_course_list:
+        grad, undergrad = 0, 0
+        try:
+            if int(course_key[-3]) > 4:
+                grad = 1
+            else:
+                undergrad = 1
+        except ValueError or TypeError:
+                undergrad = 1 #buraya bak
+        temp_list = this_course_list[course_key]
+        this_semester_dict = temp_list[2]
+        if semester in this_semester_dict:
+            if undergrad == 1:
+                answer[0] += 1
+            else:
+                answer[1] += 1
+            instr_list += this_semester_dict[semester]
+    instr_num = len(set(instr_list))
+    answer[2] = instr_num
+    return answer
 
 def course_statistics_total(dept):
     # semt_courses = {(2017,2018,1): {("CMPE", "COMPUTER+ENGINEERING"): {"CMPE150": [dept_name, coursename, semester, instructors]}} }
@@ -13,7 +38,6 @@ def course_statistics_total(dept):
     grad = 0
     undergrad = 0
     instr_num = 0
-    instr_list = []
     for course_key in this_course_list:
         try:
             if int(course_key[-3]) > 4:
@@ -22,13 +46,43 @@ def course_statistics_total(dept):
                 undergrad += 1
         except ValueError or TypeError:
             undergrad += 1 #buraya bak
+    answer = [undergrad, grad]
+
+    return answer
+
+def total_offerings_func(dept):
+    # semt_courses = {(2017,2018,1): {("CMPE", "COMPUTER+ENGINEERING"): {"CMPE150": [dept_name, coursename, semester, instructors]}} }
+    """
+    This function takes semt_courses dictionary and calculates grad, undergrad and distinct instructors for each semester and total offerings.
+    """
+    this_course_list = all_courses[dept]
+    answer = [0, 0, 0]
+    instr_list = []
+    for course_key in this_course_list:
+        grad, undergrad = 0, 0
+        try:
+            if int(course_key[-3]) > 4:
+                grad = 1
+            else:
+                undergrad = 1
+        except ValueError or TypeError:
+            undergrad = 1 #buraya bak
+        temp_list = this_course_list[course_key]
+        this_semester_dict = temp_list[2]
+        course_num = len(this_semester_dict.keys())
+        if grad == 1:
+            answer[0] += course_num
+        else:
+            answer[1] += course_num
+
         for semester in this_course_list[course_key][2]:
             instr_list += this_course_list[course_key][2][semester]
         instr_num = len(set(instr_list))
+        answer[2] = instr_num
 
-    answer = [undergrad, grad, instr_num]
 
     return answer
+
 
 
 
@@ -86,7 +140,7 @@ start = time.time()
 
 
 
-semesters = [(2017,2018,1)]#,(2018,2019,1)]   # Just for two semester for now. We will iterate over the semesters.
+semesters = [(2000,2001,1),(2000,2001,2)]#,(2018,2019,1)]   # Just for two semester for now. We will iterate over the semesters.
 
 all_courses = {}
 
@@ -133,14 +187,18 @@ df["total offerings"] = []
 for dept in sorted_dept:
     current_course_list = all_courses[dept]
     sorted_courses = sorted(current_course_list.keys())
-    new_row = {"Department/Program":dept[0] ,"Course Code":"U4 U2","Course Name":""}    ###
+    total_offering_list = course_statistics_total(dept)
+    total_offering_str = "U"+str(total_offering_list[0])+" G"+str(total_offering_list[1])
+    new_row = {"Department/Program":dept[0] ,"Course Code":total_offering_str,"Course Name":""}
 
     for semester in semesters:
         semester_name = str(semester[0])+"-"+str(semester[2])
-        new_row[semester_name] = "course_statistics(dept, semester)"           ###
-    total_offering_list = course_statistics_total(dept)
-    total_offering_str = "U"+str(total_offering_list[0])+" G"+str(total_offering_list[1])+" I"+str(str(total_offering_list[2]))
-    new_row["total offerings"] = total_offering_str
+        semester_offering_list = course_statistics(dept, semester)
+        semester_offering_str = "U"+str(semester_offering_list[0])+" G"+str(semester_offering_list[1])+" I"+str(semester_offering_list[2])
+        new_row[semester_name] = semester_offering_str
+
+    total_offer_list = total_offerings_func(dept)
+    new_row["total offerings"] = "U"+str(total_offer_list[0])+" G"+str(total_offer_list[1])+" I"+str(total_offer_list[2])
     df = df.append(new_row, ignore_index=True)
 
     for course_key in sorted_courses:
