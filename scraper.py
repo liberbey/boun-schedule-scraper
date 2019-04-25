@@ -4,6 +4,35 @@ import time
 
 
 
+def course_statistics_total(dept):
+    # semt_courses = {(2017,2018,1): {("CMPE", "COMPUTER+ENGINEERING"): {"CMPE150": [dept_name, coursename, semester, instructors]}} }
+    """
+    This function takes semt_courses dictionary and calculates grad, undergrad and distinct instructors for each semester and total offerings.
+    """
+    this_course_list = all_courses[dept]
+    grad = 0
+    undergrad = 0
+    instr_num = 0
+    instr_list = []
+    for course_key in this_course_list:
+        try:
+            if int(course_key[-3]) > 4:
+                grad += 1
+            else:
+                undergrad += 1
+        except ValueError or TypeError:
+            undergrad += 1 #buraya bak
+        for semester in this_course_list[course_key][2]:
+            instr_list += this_course_list[course_key][2][semester]
+        instr_num = len(set(instr_list))
+
+    answer = [undergrad, grad, instr_num]
+
+    return answer
+
+
+
+
 dept_list = [("ASIA", "ASIAN+STUDIES"), ("ASIA", "ASIAN+STUDIES+WITH+THESIS"),
              ("ATA", "ATATURK+INSTITUTE+FOR+MODERN+TURKISH+HISTORY"),
              ("AUTO", "AUTOMOTIVE+ENGINEERING"), ("BM", "BIOMEDICAL+ENGINEERING"),
@@ -56,7 +85,8 @@ semesters = semesters[:-1]
 start = time.time()
 
 
-semesters = [(2017,2018,1),(2018,2019,1)]   # Just for two semester for now. We will iterate over the semesters.
+
+semesters = [(2017,2018,1)]#,(2018,2019,1)]   # Just for two semester for now. We will iterate over the semesters.
 
 all_courses = {}
 
@@ -79,8 +109,10 @@ for semester in semesters:
             try:
                 course_code = row[0][:-3]     # Delete the section part. CMPE150.01 -> CMPE150
                 if course_code in all_courses[dept]:
-                    if semester not in all_courses[dept][course_code][2]:  ## BUG
+                    if semester not in all_courses[dept][course_code][2]:
                         all_courses[dept][course_code][2][semester] = [row[5]]
+                    else:
+                        all_courses[dept][course_code][2][semester].append(row[5])
                 else:
                     all_courses[dept][course_code] = [dept, row[2], {semester: [row[5]]}, {"total_offering":1}]
             except TypeError:       # If the course code is NaN, which means the row indicates Lab or Ps.
@@ -105,8 +137,10 @@ for dept in sorted_dept:
 
     for semester in semesters:
         semester_name = str(semester[0])+"-"+str(semester[2])
-        new_row[semester_name] = course_statistics(dept, semester)            ###
-    new_row["total offerings"] = course_statistics_total(dept)            ###
+        new_row[semester_name] = "course_statistics(dept, semester)"           ###
+    total_offering_list = course_statistics_total(dept)
+    total_offering_str = "U"+str(total_offering_list[0])+" G"+str(total_offering_list[1])+" I"+str(str(total_offering_list[2]))
+    new_row["total offerings"] = total_offering_str
     df = df.append(new_row, ignore_index=True)
 
     for course_key in sorted_courses:
@@ -126,31 +160,3 @@ print(df)
 
 end = time.time()
 print(end - start)
-
-
-
-def course_statistics_total(dept):
-    # semt_courses = {(2017,2018,1): {("CMPE", "COMPUTER+ENGINEERING"): {"CMPE150": [dept_name, coursename, semester, instructors]}} }
-    """
-    This function takes semt_courses dictionary and calculates grad, undergrad and distinct instructors for each semester and total offerings.
-    """
-    this_course_list = all_courses[dept]
-    grad = 0
-    undergrad = 0
-    instr_num = 0
-    instr_list = []
-    for course_key in this_course_list:
-        try:
-            if int(course_key[-3]) > 4:
-                grad += 1
-            else:
-                undergrad += 1
-        except ValueError or TypeError:
-            undergrad += 1 #buraya bak
-        for semester in course_key[2]:
-            instr_list.append(course_key[2][semester])
-        instr_num = len(set(instr_list))
-
-    answer = [grad, undergrad, instr_num]
-
-    return answer
