@@ -87,43 +87,72 @@ def total_offerings_func(dept):
 
 
 
-dept_list = [("ASIA", "ASIAN+STUDIES"), ("ASIA", "ASIAN+STUDIES+WITH+THESIS"),
+dept_list = [("ASIA", "ASIAN+STUDIES"),
+             ("ASIA", "ASIAN+STUDIES+WITH+THESIS"),
              ("ATA", "ATATURK+INSTITUTE+FOR+MODERN+TURKISH+HISTORY"),
-             ("AUTO", "AUTOMOTIVE+ENGINEERING"), ("BM", "BIOMEDICAL+ENGINEERING"),
+             ("AUTO", "AUTOMOTIVE+ENGINEERING"),
+             ("BM", "BIOMEDICAL+ENGINEERING"),
              ("BIS", "BUSINESS+INFORMATION+SYSTEMS"),
-             ("CHE", "CHEMICAL+ENGINEERING"), ("CHEM", "CHEMISTRY"), ("CE", "CIVIL+ENGINEERING"),
+             ("CHE", "CHEMICAL+ENGINEERING"),
+             ("CHEM", "CHEMISTRY"),
+             ("CE", "CIVIL+ENGINEERING"),
              ("COGS", "COGNITIVE+SCIENCE"),
-             ("CSE", "COMPUTATIONAL+SCIENCE+%26+ENGINEERING"), ("CET", "COMPUTER+EDUCATION+%26+EDUCATIONAL+TECHNOLOGY"),
+             ("CSE", "COMPUTATIONAL+SCIENCE+%26+ENGINEERING"),
+             ("CET", "COMPUTER+EDUCATION+%26+EDUCATIONAL+TECHNOLOGY"),
              ("CMPE", "COMPUTER+ENGINEERING"),
-             ("INT", "CONFERENCE+INTERPRETING"), ("CEM", "CONSTRUCTION+ENGINEERING+AND+MANAGEMENT"),
+             ("INT", "CONFERENCE+INTERPRETING"),
+             ("CEM", "CONSTRUCTION+ENGINEERING+AND+MANAGEMENT"),
              ("CCS", "CRITICAL+AND+CULTURAL+STUDIES"),
-             ("EQE", "EARTHQUAKE+ENGINEERING"), ("EC", "ECONOMICS"), ("EF", "ECONOMICS+AND+FINANCE"),
+             ("EQE", "EARTHQUAKE+ENGINEERING"),
+             ("EC", "ECONOMICS"),
+             ("EF", "ECONOMICS+AND+FINANCE"),
              ("ED", "EDUCATIONAL+SCIENCES"),
-             ("CET", "EDUCATIONAL+TECHNOLOGY"), ("EE", "ELECTRICAL+%26+ELECTRONICS+ENGINEERING"),
+             ("CET", "EDUCATIONAL+TECHNOLOGY"),
+             ("EE", "ELECTRICAL+%26+ELECTRONICS+ENGINEERING"),
              ("ETM", "ENGINEERING+AND+TECHNOLOGY+MANAGEMENT"),
-             ("ENV", "ENVIRONMENTAL+SCIENCES"), ("ENVT", "ENVIRONMENTAL+TECHNOLOGY"), ("XMB", "EXECUTIVE+MBA"),
+             ("ENV", "ENVIRONMENTAL+SCIENCES"),
+             ("ENVT", "ENVIRONMENTAL+TECHNOLOGY"),
+             ("XMB", "EXECUTIVE+MBA"),
              ("FE", "FINANCIAL+ENGINEERING"),
-             ("PA", "FINE+ARTS"), ("FLED", "FOREIGN+LANGUAGE+EDUCATION"), ("GED", "GEODESY"), ("GPH", "GEOPHYSICS"),
+             ("PA", "FINE+ARTS"),
+             ("FLED", "FOREIGN+LANGUAGE+EDUCATION"),
+             ("GED", "GEODESY"),
+             ("GPH", "GEOPHYSICS"),
              ("GUID", "GUIDANCE+%26+PSYCHOLOGICAL+COUNSELING"),
-             ("HIST", "HISTORY"), ("HUM", "HUMANITIES+COURSES+COORDINATOR"), ("IE", "INDUSTRIAL+ENGINEERING"),
+             ("HIST", "HISTORY"),
+             ("HUM", "HUMANITIES+COURSES+COORDINATOR"),
+             ("IE", "INDUSTRIAL+ENGINEERING"),
              ("INCT", "INTERNATIONAL+COMPETITION+AND+TRADE"),
              ("MIR", "INTERNATIONAL+RELATIONS%3aTURKEY%2cEUROPE+AND+THE+MIDDLE+EAST"),
              ("MIR", "INTERNATIONAL+RELATIONS%3aTURKEY%2cEUROPE+AND+THE+MIDDLE+EAST+WITH+THESIS"),
-             ("INTT", "INTERNATIONAL+TRADE"), ("INTT", "INTERNATIONAL+TRADE+MANAGEMENT"), ("LS", "LEARNING+SCIENCES"),
+             ("INTT", "INTERNATIONAL+TRADE"),
+             ("INTT", "INTERNATIONAL+TRADE+MANAGEMENT"),
+             ("LS", "LEARNING+SCIENCES"),
              ("LING", "LINGUISTICS"),
-             ("AD", "MANAGEMENT"), ("MIS", "MANAGEMENT+INFORMATION+SYSTEMS"), ("MATH", "MATHEMATICS"),
+             ("AD", "MANAGEMENT"),
+             ("MIS", "MANAGEMENT+INFORMATION+SYSTEMS"),
+             ("MATH", "MATHEMATICS"),
              ("SCED", "MATHEMATICS+AND+SCIENCE+EDUCATION"),
-             ("ME", "MECHANICAL+ENGINEERING"), ("MECA", "MECHATRONICS+ENGINEERING"),
-             ("BIO", "MOLECULAR+BIOLOGY+%26+GENETICS"), ("PHIL", "PHILOSOPHY"),
-             ("PE", "PHYSICAL+EDUCATION"), ("PHYS", "PHYSICS"), ("POLS", "POLITICAL+SCIENCE%26INTERNATIONAL+RELATIONS"),
+             ("ME", "MECHANICAL+ENGINEERING"),
+             ("MECA", "MECHATRONICS+ENGINEERING"),
+             ("BIO", "MOLECULAR+BIOLOGY+%26+GENETICS"),
+             ("PHIL", "PHILOSOPHY"),
+             ("PE", "PHYSICAL+EDUCATION"),
+             ("PHYS", "PHYSICS"),
+             ("POLS", "POLITICAL+SCIENCE%26INTERNATIONAL+RELATIONS"),
              ("PRED", "PRIMARY+EDUCATION"),
-             ("PSY", "PSYCHOLOGY"), ("YADYOK", "SCHOOL+OF+FOREIGN+LANGUAGES"),
+             ("PSY", "PSYCHOLOGY"),
+             ("YADYOK", "SCHOOL+OF+FOREIGN+LANGUAGES"),
              ("SCED", "SECONDARY+SCHOOL+SCIENCE+AND+MATHEMATICS+EDUCATION"),
-             ("SPL", "SOCIAL+POLICY+WITH+THESIS"), ("SOC", "SOCIOLOGY"), ("SWE", "SOFTWARE+ENGINEERING"),
+             ("SPL", "SOCIAL+POLICY+WITH+THESIS"),
+             ("SOC", "SOCIOLOGY"), ("SWE", "SOFTWARE+ENGINEERING"),
              ("SWE", "SOFTWARE+ENGINEERING+WITH+THESIS"),
-             ("TRM", "SUSTAINABLE+TOURISM+MANAGEMENT"), ("SCO", "SYSTEMS+%26+CONTROL+ENGINEERING"),
-             ("TRM", "TOURISM+ADMINISTRATION"), ("WTR", "TRANSLATION"),
-             ("TR", "TRANSLATION+AND+INTERPRETING+STUDIES"), ("TK", "TURKISH+COURSES+COORDINATOR"),
+             ("TRM", "SUSTAINABLE+TOURISM+MANAGEMENT"),
+             ("SCO", "SYSTEMS+%26+CONTROL+ENGINEERING"),
+             ("TRM", "TOURISM+ADMINISTRATION"),
+             ("WTR", "TRANSLATION"),
+             ("TR", "TRANSLATION+AND+INTERPRETING+STUDIES"),
+             ("TK", "TURKISH+COURSES+COORDINATOR"),
              ("LL", "WESTERN+LANGUAGES+%26+LITERATURES")]
 
 n = 1998  # create the list for years and semesters
@@ -140,7 +169,7 @@ start = time.time()
 
 
 
-semesters = [(2000,2001,1),(2000,2001,2)]#,(2018,2019,1)]   # Just for two semester for now. We will iterate over the semesters.
+semesters = [(2017,2018,1),(2017,2018,2),(2017,2018,3)]#,(2018,2019,1)]   # Just for two semester for now. We will iterate over the semesters.
 
 all_courses = {}
 
@@ -165,13 +194,13 @@ for semester in semesters:
                 if course_code in all_courses[dept]:
                     if semester not in all_courses[dept][course_code][2]:
                         all_courses[dept][course_code][2][semester] = [row[5]]
+                        all_courses[dept][course_code][3]["total_offering"] += 1
                     else:
                         all_courses[dept][course_code][2][semester].append(row[5])
                 else:
                     all_courses[dept][course_code] = [dept, row[2], {semester: [row[5]]}, {"total_offering":1}]
             except TypeError:       # If the course code is NaN, which means the row indicates Lab or Ps.
                 continue
-
 
 
 sorted_dept = sorted(all_courses.keys())
@@ -203,14 +232,12 @@ for dept in sorted_dept:
 
     for course_key in sorted_courses:
         course = current_course_list[course_key]
+        new_row = {"Department/Program":"" ,"Course Code":course_key,"Course Name":course[1],"total offerings":str(course[3]["total_offering"])+"/"+str(len(set(np.concatenate(list(course[2].values())))))}
         for semester in course[2]:
             semester_name = str(semester[0])+"-"+str(semester[2])
-            if len(df.loc[df["Course Code"] == course_key]) == 0:
-                new_row = {"Department/Program":"" ,"Course Code":course_key,"Course Name":course[1]}
-                new_row[semester_name] = "x"
-                df = df.append(new_row, ignore_index=True)
-            else:
-                df.loc[df["Course Code"] == course_key, semester_name] = "x"
+            new_row[semester_name] = "x"
+        df = df.append(new_row, ignore_index=True)
+
 
 df.to_csv("output.csv")
 print(df)
