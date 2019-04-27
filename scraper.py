@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import time
-
+from io import StringIO
 
 def course_statistics(dept, semester):
 
@@ -169,7 +169,7 @@ start = time.time()
 
 
 
-semesters = [(2017,2018,1),(2017,2018,2),(2017,2018,3)]#,(2018,2019,1)]   # Just for two semester for now. We will iterate over the semesters.
+semesters = [(2017,2018,1)]#,(2017,2018,2),(2017,2018,3)]#,(2018,2019,1)]   # Just for two semester for now. We will iterate over the semesters.
 
 all_courses = {}
 
@@ -239,8 +239,10 @@ for dept in sorted_dept:
         df = df.append(new_row, ignore_index=True)
 
 
-df.to_csv("output.csv")
-print(df)
+output = StringIO()
+df.to_csv(output)
+output.seek(0)
+print(output.read())
 
 
 end = time.time()
