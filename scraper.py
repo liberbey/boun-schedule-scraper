@@ -1,7 +1,51 @@
+#!/usr/bin/env python
+
 import pandas as pd
 import numpy as np
 import time
 from io import StringIO
+import sys
+
+
+def get_semester_column_name(semester):
+    if semester[2] == 1:
+        return str(semester[0])+"-Fall"
+    elif semester[2] == 2:
+        return str(semester[1])+"-Spring"
+    else:
+        return str(semester[1])+"-Summer"
+
+
+def get_semester_name(str):
+    year = int(str[:4])
+    term = str[5:]
+    if term == "Fall":
+        return (year, year+1, 1)
+    elif term == "Spring":
+        return (year-1, year, 2)
+    elif term == "Summer":
+        return (year-1, year, 3)
+    else:
+        print("False parameter")
+
+
+def get_course_name(str):
+    str += '   '
+    new = []
+    for i in range(0,len(str)-3):
+        if str[i] == '+':
+            new.append(' ')
+        elif str[i:i+3] == '%2c':
+            new.append(',')
+        elif str[i:i+3] == '%3a':
+            new.append(':')
+        elif str[i:i+3] == '%26':
+            new.append('&')
+        elif str[i] == ' ':
+            continue
+        else:
+            new.append(str[i])
+    return "".join(new)
 
 def course_statistics(dept, semester):
 
@@ -66,14 +110,14 @@ def total_offerings_func(dept):
             else:
                 undergrad = 1
         except ValueError or TypeError:
-            undergrad = 1 #buraya bak
+            undergrad = 1
         temp_list = this_course_list[course_key]
         this_semester_dict = temp_list[2]
         course_num = len(this_semester_dict.keys())
         if grad == 1:
-            answer[0] += course_num
-        else:
             answer[1] += course_num
+        else:
+            answer[0] += course_num
 
         for semester in this_course_list[course_key][2]:
             instr_list += this_course_list[course_key][2][semester]
@@ -154,6 +198,7 @@ dept_list = [("ASIA", "ASIAN+STUDIES"),
              ("TR", "TRANSLATION+AND+INTERPRETING+STUDIES"),
              ("TK", "TURKISH+COURSES+COORDINATOR"),
              ("LL", "WESTERN+LANGUAGES+%26+LITERATURES")]
+start = time.time()
 
 n = 1998  # create the list for years and semesters
 semesters = []
@@ -161,15 +206,27 @@ for i in range(21):
     for a in range(1, 4):
         semesters += [(n, n + 1, a)]
     n += 1
-
 semesters = semesters[:-1]
 
 
-start = time.time()
+semester_names = []
 
 
+semester_1 = get_semester_name(sys.argv[1])
+semester_2 = get_semester_name(sys.argv[2])
 
-semesters = [(2017,2018,1)]#,(2017,2018,2),(2017,2018,3)]#,(2018,2019,1)]   # Just for two semester for now. We will iterate over the semesters.
+for semester_index in range(len(semesters)):
+    if semesters[semester_index] == semester_1:
+        first_index = semester_index
+    if semesters[semester_index] == semester_2:
+        second_index = semester_index
+
+semesters = semesters[first_index:second_index+1]
+
+for s in semesters:
+    semester_names.append(get_semester_column_name(s))
+
+#########################################################################################################################
 
 all_courses = {}
 
@@ -208,39 +265,39 @@ sorted_dept = sorted(all_courses.keys())
 
 df = pd.DataFrame(columns=["Department/Program", "Course Code", "Course Name"])
 
-for semester in semesters:
-    semester_name = str(semester[0])+"-"+str(semester[2])
-    df[semester_name] = []
-df["total offerings"] = []
+for semester in semester_names:
+    df[semester] = []
+df["Total Offerings"] = []
 
 for dept in sorted_dept:
     current_course_list = all_courses[dept]
     sorted_courses = sorted(current_course_list.keys())
     total_offering_list = course_statistics_total(dept)
     total_offering_str = "U"+str(total_offering_list[0])+" G"+str(total_offering_list[1])
-    new_row = {"Department/Program":dept[0] ,"Course Code":total_offering_str,"Course Name":""}
+    new_row = {"Department/Program":get_course_name(dept[0]) + " (" +get_course_name(dept[1])+")" ,"Course Code":total_offering_str,"Course Name":""}
 
     for semester in semesters:
-        semester_name = str(semester[0])+"-"+str(semester[2])
+        semester_name = get_semester_column_name(semester)
         semester_offering_list = course_statistics(dept, semester)
         semester_offering_str = "U"+str(semester_offering_list[0])+" G"+str(semester_offering_list[1])+" I"+str(semester_offering_list[2])
         new_row[semester_name] = semester_offering_str
 
     total_offer_list = total_offerings_func(dept)
-    new_row["total offerings"] = "U"+str(total_offer_list[0])+" G"+str(total_offer_list[1])+" I"+str(total_offer_list[2])
+    new_row["Total Offerings"] = "U"+str(total_offer_list[0])+" G"+str(total_offer_list[1])+" I"+str(total_offer_list[2])
     df = df.append(new_row, ignore_index=True)
 
     for course_key in sorted_courses:
         course = current_course_list[course_key]
-        new_row = {"Department/Program":"" ,"Course Code":course_key,"Course Name":course[1],"total offerings":str(course[3]["total_offering"])+"/"+str(len(set(np.concatenate(list(course[2].values())))))}
+        new_row = {"Department/Program":"" ,"Course Code":course_key,"Course Name":course[1],"Total Offerings":str(course[3]["total_offering"])+"/"+str(len(set(np.concatenate(list(course[2].values())))))}
         for semester in course[2]:
-            semester_name = str(semester[0])+"-"+str(semester[2])
+            semester_name = get_semester_column_name(semester)
             new_row[semester_name] = "x"
         df = df.append(new_row, ignore_index=True)
 
 
 output = StringIO()
 df.to_csv(output)
+df.to_csv("output.csv")
 output.seek(0)
 print(output.read())
 
