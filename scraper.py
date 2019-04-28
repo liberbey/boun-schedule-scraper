@@ -8,6 +8,9 @@ import sys
 
 
 def get_semester_column_name(semester):
+    '''
+    This function gets a semester and converts it to a string(semester name) such as (2017, 2018, 1) to 2017-Fall.
+    '''
     if semester[2] == 1:
         return str(semester[0])+"-Fall"
     elif semester[2] == 2:
@@ -17,8 +20,11 @@ def get_semester_column_name(semester):
 
 
 def get_semester_name(str):
-    year = int(str[:4])
-    term = str[5:]
+    '''
+    This function gets a semester name and converts it to a semester such as 2017-Fall to (2017, 2018, 1).
+    '''
+    year = int(str[:4]) #year part of semester name
+    term = str[5:] #term part of semester name
     if term == "Fall":
         return (year, year+1, 1)
     elif term == "Spring":
@@ -30,9 +36,12 @@ def get_semester_name(str):
 
 
 def get_course_name(str):
+    '''
+    This function takes a course and department name as parameter, convert it to human readable form.
+    '''
     str += '   '
-    new = []
-    for i in range(0,len(str)-3):
+    new = [] #we will put the new string char by char to an array
+    for i in range(0,len(str)-3): #get rid of +, %26, %3a, %2c
         if str[i] == '+':
             new.append(' ')
         elif str[i:i+3] == '%2c':
@@ -43,85 +52,97 @@ def get_course_name(str):
             new.append('&')
         elif str[i] == ' ':
             continue
+        elif str[i] == '2':
+            continue
+        elif str[i] == '6':
+            continue
+        elif str[i] == '3':
+            continue
+        elif str[i] == 'a':
+            continue
+        elif str[i] == 'c':
+            continue
+
         else:
             new.append(str[i])
-    return "".join(new)
+    return "".join(new) #convert the array to a string and return it
 
 def course_statistics(dept, semester):
+    '''
+    This function calculates the number of graduate courses, undergraduate courses and distinct instructors of a department in a semester.
+    '''
 
-    this_course_list = all_courses[dept]
+    this_course_list = all_courses[dept] #list of all courses in that department
     answer = [0, 0, 0]
     instr_list = []
     for course_key in this_course_list:
         grad, undergrad = 0, 0
         try:
-            if int(course_key[-3]) > 4:
+            if int(course_key[-3]) > 4: #check key of the course, for example for CMPE150 it will check '1' and undegrad will be 1
                 grad = 1
             else:
                 undergrad = 1
-        except ValueError or TypeError:
-                undergrad = 1 #buraya bak
+        except ValueError or TypeError: #if there is not a number there, course is undergraduate
+                undergrad = 1
         temp_list = this_course_list[course_key]
-        this_semester_dict = temp_list[2]
-        if semester in this_semester_dict:
+        this_semester_dict = temp_list[2] #there is a dictionary in 2nd element of the array and it is like: {(2017, 2018, 1): [Cam Ozturan, Cem Say]}
+        if semester in this_semester_dict: #if that dictionary contains the semester
             if undergrad == 1:
                 answer[0] += 1
             else:
                 answer[1] += 1
-            instr_list += this_semester_dict[semester]
-    instr_num = len(set(instr_list))
+            instr_list += this_semester_dict[semester] #add the instructors to the instructor list
+    instr_num = len(set(instr_list)) #finds the number of distinc instructors
     answer[2] = instr_num
     return answer
 
 def course_statistics_total(dept):
-    # semt_courses = {(2017,2018,1): {("CMPE", "COMPUTER+ENGINEERING"): {"CMPE150": [dept_name, coursename, semester, instructors]}} }
     """
-    This function takes semt_courses dictionary and calculates grad, undergrad and distinct instructors for each semester and total offerings.
+    This function takes all_courses dictionary and calculates number of grad and undergrad courses for given department.
     """
-    this_course_list = all_courses[dept]
+    this_course_list = all_courses[dept] #list of all courses in that department
     grad = 0
     undergrad = 0
     instr_num = 0
     for course_key in this_course_list:
         try:
-            if int(course_key[-3]) > 4:
+            if int(course_key[-3]) > 4: #check key of the course, for example for CMPE150 it will check '1' and undegrad will be 1
                 grad += 1
             else:
                 undergrad += 1
-        except ValueError or TypeError:
-            undergrad += 1 #buraya bak
+        except ValueError or TypeError: #if there is not a number there, course is undergraduate
+            undergrad += 1
     answer = [undergrad, grad]
 
     return answer
 
 def total_offerings_func(dept):
-    # semt_courses = {(2017,2018,1): {("CMPE", "COMPUTER+ENGINEERING"): {"CMPE150": [dept_name, coursename, semester, instructors]}} }
     """
-    This function takes semt_courses dictionary and calculates grad, undergrad and distinct instructors for each semester and total offerings.
+    This function takes all_courses dictionary and calculates grad, undergrad and distinct instructors for a department for total offerings part.
     """
-    this_course_list = all_courses[dept]
+    this_course_list = all_courses[dept] #list of all courses in that department
     answer = [0, 0, 0]
     instr_list = []
-    for course_key in this_course_list:
+    for course_key in this_course_list: #for each course
         grad, undergrad = 0, 0
         try:
-            if int(course_key[-3]) > 4:
+            if int(course_key[-3]) > 4: #check key of the course, for example for CMPE150 it will check '1' and undegrad will be 1
                 grad = 1
             else:
                 undergrad = 1
-        except ValueError or TypeError:
+        except ValueError or TypeError: #if there is not a number there, course is undergraduate
             undergrad = 1
         temp_list = this_course_list[course_key]
-        this_semester_dict = temp_list[2]
-        course_num = len(this_semester_dict.keys())
+        this_semester_dict = temp_list[2] #there is a dictionary in 2nd element of the array that contains semesters and instructors, it is like: {(2017, 2018, 1): [Cam Ozturan, Cem Say]}
+        course_num = len(this_semester_dict.keys()) #how many times the course is opened in different semesters
         if grad == 1:
             answer[1] += course_num
         else:
             answer[0] += course_num
 
-        for semester in this_course_list[course_key][2]:
-            instr_list += this_course_list[course_key][2][semester]
-        instr_num = len(set(instr_list))
+        for semester in this_course_list[course_key][2]: #for the number of distinc instructors
+            instr_list += this_course_list[course_key][2][semester] #add all to the list
+        instr_num = len(set(instr_list)) #calculate the distincts
         answer[2] = instr_num
 
 
@@ -130,7 +151,7 @@ def total_offerings_func(dept):
 
 
 
-
+#list of all department names
 dept_list = [("ASIA", "ASIAN+STUDIES"),
              ("ASIA", "ASIAN+STUDIES+WITH+THESIS"),
              ("ATA", "ATATURK+INSTITUTE+FOR+MODERN+TURKISH+HISTORY"),
@@ -202,29 +223,29 @@ start = time.time()
 
 n = 1998  # create the list for years and semesters
 semesters = []
-for i in range(21):
-    for a in range(1, 4):
-        semesters += [(n, n + 1, a)]
+for i in range(21): #for each year
+    for a in range(1, 4): #for each semester
+        semesters += [(n, n + 1, a)] #such as (2014, 2015, 1)
     n += 1
-semesters = semesters[:-1]
+semesters = semesters[:-1] #get rid of the last one, summer semester of 2018-2019
 
 
 semester_names = []
 
 
-semester_1 = get_semester_name(sys.argv[1])
-semester_2 = get_semester_name(sys.argv[2])
+semester_1 = get_semester_name(sys.argv[1]) #input 1, first semester
+semester_2 = get_semester_name(sys.argv[2]) #input 2, second semester
 
-for semester_index in range(len(semesters)):
-    if semesters[semester_index] == semester_1:
+for semester_index in range(len(semesters)): #this part gives the indexes of semester[] list that we will use
+    if semesters[semester_index] == semester_1: #first index
         first_index = semester_index
-    if semesters[semester_index] == semester_2:
+    if semesters[semester_index] == semester_2: #second index
         second_index = semester_index
 
-semesters = semesters[first_index:second_index+1]
+semesters = semesters[first_index:second_index+1] #we will use the semesters between two indexes
 
 for s in semesters:
-    semester_names.append(get_semester_column_name(s))
+    semester_names.append(get_semester_column_name(s)) #create the list of semester names for the semesters that we will use
 
 #########################################################################################################################
 
