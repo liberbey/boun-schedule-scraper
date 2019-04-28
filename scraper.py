@@ -284,7 +284,7 @@ for semester in semesters:
             except TypeError:       # If the course code is NaN, which means the row indicates Lab or Ps.
                 continue
 
-
+# Sort departments by its short names.
 sorted_dept = sorted(all_courses.keys())
 
 
@@ -337,8 +337,5 @@ df.to_csv(output, index=False)
 # reset the cursor.
 output.seek(0)
 
+# print the result
 print(output.read())
-
-
-end = time.time()
-print(end - start)
