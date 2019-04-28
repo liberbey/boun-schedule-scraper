@@ -247,12 +247,12 @@ semesters = semesters[first_index:second_index+1] #we will use the semesters bet
 for s in semesters:
     semester_names.append(get_semester_column_name(s)) #create the list of semester names for the semesters that we will use
 
-#########################################################################################################################
 
-all_courses = {}
+all_courses = {} # Information about courses will be stored in this dictionary.
 
 for semester in semesters:
     for dept in dept_list:
+        # get the html table
         url = "https://registration.boun.edu.tr/scripts/sch.asp?donem={}/{}-{}&kisaadi={}&bolum={}".format(semester[0],
                                                                                                            semester[1],
                                                                                                            semester[2],
@@ -264,11 +264,14 @@ for semester in semesters:
         except ValueError:    # If table does not exist
             continue
 
+        # Store the department name then iterate over the courses in that department and semester.
         if dept not in all_courses:
             all_courses[dept] = {}
         for index, row in data.iterrows():    # Iterate over the rows of the dataframe read from html source code.
             try:
                 course_code = row[0][:-3]     # Delete the section part. CMPE150.01 -> CMPE150
+
+                # If the course is already added to the dictionary, just update the info. Otherwise, add that course to the dictionary.
                 if course_code in all_courses[dept]:
                     if semester not in all_courses[dept][course_code][2]:
                         all_courses[dept][course_code][2][semester] = [row[5]]
@@ -276,6 +279,7 @@ for semester in semesters:
                     else:
                         all_courses[dept][course_code][2][semester].append(row[5])
                 else:
+                    # Store the course info in the order of department name, course name, instructors by semesters and number of total offering.
                     all_courses[dept][course_code] = [dept, row[2], {semester: [row[5]]}, {"total_offering":1}]
             except TypeError:       # If the course code is NaN, which means the row indicates Lab or Ps.
                 continue
@@ -293,20 +297,29 @@ df["Total Offerings"] = []
 for dept in sorted_dept:
     current_course_list = all_courses[dept]
     sorted_courses = sorted(current_course_list.keys())
+
+    # get the total offerings info for all semester (info located in the coursecode column).
     total_offering_list = course_statistics_total(dept)
     total_offering_str = "U"+str(total_offering_list[0])+" G"+str(total_offering_list[1])
+
+    # create the new row that will be appended later.
     new_row = {"Department/Program":get_course_name(dept[0]) + " (" +get_course_name(dept[1])+")" ,"Course Code":total_offering_str,"Course Name":""}
 
+    # for each semester, obtain the necessary information for the department.
     for semester in semesters:
         semester_name = get_semester_column_name(semester)
         semester_offering_list = course_statistics(dept, semester)
         semester_offering_str = "U"+str(semester_offering_list[0])+" G"+str(semester_offering_list[1])+" I"+str(semester_offering_list[2])
         new_row[semester_name] = semester_offering_str
 
+    # get the total offering info for the department and update the new row.
     total_offer_list = total_offerings_func(dept)
     new_row["Total Offerings"] = "U"+str(total_offer_list[0])+" G"+str(total_offer_list[1])+" I"+str(total_offer_list[2])
+
+    # Append the new row to dataframe.
     df = df.append(new_row, ignore_index=True)
 
+    # Iterate over the courses in department and semester, also append a new row that carries course info to the dataframe.
     for course_key in sorted_courses:
         course = current_course_list[course_key]
         new_row = {"Department/Program":"" ,"Course Code":course_key,"Course Name":course[1],"Total Offerings":str(course[3]["total_offering"])+"/"+str(len(set(np.concatenate(list(course[2].values())))))}
@@ -315,11 +328,15 @@ for dept in sorted_dept:
             new_row[semester_name] = "x"
         df = df.append(new_row, ignore_index=True)
 
-
+# in order to print out the table on console.
 output = StringIO()
-df.to_csv(output)
-df.to_csv("output.csv")
+
+# transform to csv format.
+df.to_csv(output, index=False)
+
+# reset the cursor.
 output.seek(0)
+
 print(output.read())
 
 
