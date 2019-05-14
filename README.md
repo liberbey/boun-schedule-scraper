@@ -7,7 +7,9 @@ This program crawls Bogazici University’s OBIKAS registration pages and extrac
 ## How to Use?
 
 1. Run the program with giving the desired range of semesters as an argument such as start[1] and end[2] semester.
-For example: >.​/bucourses.py 2018-Fall 2019-Spring Implementation Details
+For example: >.​/bucourses.py 2018-Fall 2019-Spring 
+
+## Implementation Details
 
 ## 1- get_semester_column_name(semester)
 This function gets a semester and converts it to a string(semester name) such as (2017, 2018, 1) to 2017-Fall for writing to heads of columns.
